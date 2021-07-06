@@ -1,5 +1,5 @@
 numpy
-torch>=1.1
+torch==1.4
 numba
 tensorboardX
 easydict
@@ -7,4 +7,4 @@ pyyaml
 scikit-image
 tqdm
 kornia
-torchvision
+torchvision==0.5.0
