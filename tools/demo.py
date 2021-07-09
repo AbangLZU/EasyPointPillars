@@ -2,7 +2,6 @@ import argparse
 import glob
 from pathlib import Path
 
-import mayavi.mlab as mlab
 import numpy as np
 import torch
 
@@ -10,8 +9,10 @@ from pcdet.config import cfg, cfg_from_yaml_file
 from pcdet.datasets import DatasetTemplate
 from pcdet.models import build_network, load_data_to_gpu
 from pcdet.utils import common_utils
-from visual_utils import visualize_utils as V
 
+import open3d as o3d
+from open3d.visualization import draw_geometries
+from visual_tools import draw_clouds_with_boxes
 
 class DemoDataset(DatasetTemplate):
     def __init__(self, dataset_cfg, class_names, training=True, root_path=None, logger=None, ext='.bin'):
@@ -55,11 +56,12 @@ class DemoDataset(DatasetTemplate):
 
 def parse_config():
     parser = argparse.ArgumentParser(description='arg parser')
-    parser.add_argument('--cfg_file', type=str, default='cfgs/kitti_models/second.yaml',
+    parser.add_argument('--cfg_file', type=str, default='cfgs/kitti_models/pointpillar.yaml',
                         help='specify the config for demo')
-    parser.add_argument('--data_path', type=str, default='demo_data',
+    parser.add_argument('--data_path', type=str, default='../data/kitti/testing/velodyne/000018.bin',
                         help='specify the point cloud data file or directory')
-    parser.add_argument('--ckpt', type=str, default=None, help='specify the pretrained model')
+    parser.add_argument('--ckpt', type=str, default='../output/kitti_models/pointpillar/default/ckpt/checkpoint_epoch_80.pth', 
+                        help='specify the pretrained model')
     parser.add_argument('--ext', type=str, default='.bin', help='specify the extension of your point cloud data file')
 
     args = parser.parse_args()
@@ -89,12 +91,21 @@ def main():
             data_dict = demo_dataset.collate_batch([data_dict])
             load_data_to_gpu(data_dict)
             pred_dicts, _ = model.forward(data_dict)
+            # print(pred_dicts)
+            points=data_dict['points'][:, 1:]
+            ref_boxes=pred_dicts[0]['pred_boxes']
+            ref_scores=pred_dicts[0]['pred_scores']
+            ref_labels=pred_dicts[0]['pred_labels']
+            print(type(points), points.shape)
 
-            V.draw_scenes(
-                points=data_dict['points'][:, 1:], ref_boxes=pred_dicts[0]['pred_boxes'],
-                ref_scores=pred_dicts[0]['pred_scores'], ref_labels=pred_dicts[0]['pred_labels']
-            )
-            mlab.show(stop=True)
+            points = points.cpu().numpy()
+            boxs = ref_boxes.cpu().numpy()
+            labels = ref_labels.cpu().numpy()
+            scores = ref_scores.cpu().numpy()
+            # filter score < 0.4
+            labels = labels & (scores > 0.4)
+            print(labels)
+            draw_clouds_with_boxes(points, boxs, labels)
 
     logger.info('Demo done.')
 
