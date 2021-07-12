@@ -2,7 +2,8 @@ import torch
 from torch import nn
 import numpy as np
 from onnx_utils.onnx_backbone_2d import BaseBEVBackbone
-from onnx_utils.onnx_dense_head import  AnchorHeadMulti
+# from onnx_utils.onnx_dense_head import  AnchorHeadMulti, SingleHead
+from pcdet.models.dense_heads.anchor_head_single import AnchorHeadSingle
 from pcdet.config import cfg, cfg_from_yaml_file
 
 import argparse
@@ -11,7 +12,7 @@ class backbone(nn.Module):
     def __init__(self, cfg , gridx , gridy):
         super().__init__()
         self.backbone_2d = BaseBEVBackbone(cfg.MODEL.BACKBONE_2D, 64)
-        self.dense_head =  AnchorHeadMulti(
+        self.dense_head =  AnchorHeadSingle(
             model_cfg=cfg.MODEL.DENSE_HEAD,
             input_channels=384,
             num_class=len(cfg.CLASS_NAMES),
@@ -55,7 +56,7 @@ def parse_config():
                         help='specify the config')
     parser.add_argument('--ckpt', type=str, default='../output/kitti_models/pointpillar/default/ckpt/checkpoint_epoch_80.pth', 
                         help='specify the pretrained model')
-    parser.add_argument('--output_path', type=str, default='../output/kitti_models/pointpillar/onnx/backbone.onnx', 
+    parser.add_argument('--output_path', type=str, default='../output/kitti_models/pointpillar/onnx/backbone_head.onnx', 
                         help='specify the onnx backbone model output path')
 
     args = parser.parse_args()
