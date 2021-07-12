@@ -8,3 +8,4 @@ scikit-image
 tqdm
 kornia
 torchvision==0.5.0
+open3d
