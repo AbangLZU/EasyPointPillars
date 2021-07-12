@@ -58,7 +58,7 @@ def parse_config():
     parser = argparse.ArgumentParser(description='arg parser')
     parser.add_argument('--cfg_file', type=str, default='cfgs/kitti_models/pointpillar.yaml',
                         help='specify the config for demo')
-    parser.add_argument('--data_path', type=str, default='../data/kitti/testing/velodyne/000018.bin',
+    parser.add_argument('--data_path', type=str, default='../data/kitti/testing/velodyne/000099.bin',
                         help='specify the point cloud data file or directory')
     parser.add_argument('--ckpt', type=str, default='../output/kitti_models/pointpillar/default/ckpt/checkpoint_epoch_80.pth', 
                         help='specify the pretrained model')
@@ -91,20 +91,27 @@ def main():
             data_dict = demo_dataset.collate_batch([data_dict])
             load_data_to_gpu(data_dict)
             pred_dicts, _ = model.forward(data_dict)
-            # print(pred_dicts)
             points=data_dict['points'][:, 1:]
             ref_boxes=pred_dicts[0]['pred_boxes']
             ref_scores=pred_dicts[0]['pred_scores']
             ref_labels=pred_dicts[0]['pred_labels']
-            print(type(points), points.shape)
+            # print(type(points), points.shape)
 
             points = points.cpu().numpy()
             boxs = ref_boxes.cpu().numpy()
             labels = ref_labels.cpu().numpy()
             scores = ref_scores.cpu().numpy()
+            # print(labels)
             # filter score < 0.4
-            labels = labels & (scores > 0.4)
-            print(labels)
+            scores = scores > 0.4
+            for i, sc in enumerate(scores):
+                if(sc):
+                    labels[i] = labels[i]
+                else:
+                    labels[i] = 999
+            # labels = labels & (scores > 0.4)
+            # kitti dataset, 1: Car, 2: Pedestrian, 3: Cyclist
+            # print(labels)
             draw_clouds_with_boxes(points, boxs, labels)
 
     logger.info('Demo done.')
