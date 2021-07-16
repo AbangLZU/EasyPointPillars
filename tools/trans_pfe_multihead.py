@@ -100,11 +100,11 @@ def build_pfe(ckpt,cfg):
 
 def parse_config():
     parser = argparse.ArgumentParser(description='arg parser')
-    parser.add_argument('--cfg_file', type=str, default='cfgs/kitti_models/pointpillar.yaml',
+    parser.add_argument('--cfg_file', type=str, default='/media/data/OpenPCDet/tools/cfgs/nuscenes_models/cbgs_pp_multihead.yaml',
                         help='specify the config')
-    parser.add_argument('--ckpt', type=str, default='../output/kitti_models/pointpillar/default/ckpt/checkpoint_epoch_80.pth', 
+    parser.add_argument('--ckpt', type=str, default='/media/data/OpenPCDet/output/kitti_models/pointpillar/official/pp_multihead_nds5823_updated.pth', 
                         help='specify the pretrained model')
-    parser.add_argument('--output_path', type=str, default='../output/kitti/pfe.onnx', 
+    parser.add_argument('--output_path', type=str, default='../output/kitti_models/pointpillar/onnx/pfe-3.onnx', 
                         help='specify the onnx pfe model output path')
 
     args = parser.parse_args()
