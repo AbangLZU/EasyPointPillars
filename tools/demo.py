@@ -13,6 +13,7 @@ from pcdet.utils import common_utils
 import open3d as o3d
 from open3d.visualization import draw_geometries
 from visual_tools import draw_clouds_with_boxes
+import datetime
 
 class DemoDataset(DatasetTemplate):
     def __init__(self, dataset_cfg, class_names, training=True, root_path=None, logger=None, ext='.bin'):
@@ -83,14 +84,24 @@ def main():
 
     model = build_network(model_cfg=cfg.MODEL, num_class=len(cfg.CLASS_NAMES), dataset=demo_dataset)
     model.load_params_from_file(filename=args.ckpt, logger=logger, to_cpu=True)
+
     model.cuda()
     model.eval()
+
     with torch.no_grad():
         for idx, data_dict in enumerate(demo_dataset):
             logger.info(f'Visualized sample index: \t{idx + 1}')
             data_dict = demo_dataset.collate_batch([data_dict])
             load_data_to_gpu(data_dict)
+
+            start_time = datetime.datetime.now()
+
             pred_dicts, _ = model.forward(data_dict)
+
+            end_time = datetime.datetime.now()
+            inference_time = (end_time - start_time).total_seconds()
+            print("Inference 1 sample time ", inference_time, 's')
+
             points=data_dict['points'][:, 1:]
             ref_boxes=pred_dicts[0]['pred_boxes']
             ref_scores=pred_dicts[0]['pred_scores']
