@@ -1,5 +1,20 @@
 <img src="docs/open_mmlab.png" align="right" width="30%">
 
+# Update from AdamShan
+
+I modified the OpenPCDet project, the change include:
+
+* add scripts to export the onnx model of pointpillars(both singlehead and multihead, for both kitti and nuscene)
+* add TensorRT inference C++ code
+* modify the demo and visualization script, useing open3d
+
+So with this repo, you can try to reproduce the pointpillars traing, pytorch -> onnx -> trt, and deploy your trt engine in C++ project.
+
+For more detailed information and description, see my blog later~
+
+
+------ original readme  of OpenPCDet project-------
+
 # OpenPCDet
 
 `OpenPCDet` is a clear, simple, self-contained open source project for LiDAR-based 3D object detection. 
