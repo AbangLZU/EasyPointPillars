@@ -7,7 +7,6 @@ data/
 venv/
 *.idea/
 *.so
-*.yaml
 *.sh
 *.pth
 *.pkl
@@ -15,3 +14,5 @@ venv/
 *.bin
 output
 version.py
+
+.vscode

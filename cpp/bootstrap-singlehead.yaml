@@ -1,0 +1,17 @@
+BoxFeature: 7
+ScoreThreshold: 0.3
+NmsOverlapThreshold: 0.2
+UseOnnx: false 
+UseMultiHead: false
+DataSet: Kitti
+
+PfeOnnx: ../../output/kitti/pfe-sim.onnx
+BackboneOnnx: ../../output/kitti/backbone-sim.onnx
+
+PfeTrt: ../../output/kitti/pfe.trt
+BackboneTrt: ../../output/kitti/backbone.trt
+
+ModelConfig: ../../tools/cfgs/kitti_models/pointpillar.yaml
+
+InputFile: ../test-data/99.txt
+OutputFile: ../test-data/boxes.txt

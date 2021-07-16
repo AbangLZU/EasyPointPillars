@@ -1,0 +1,15 @@
+BoxFeature: 7
+ScoreThreshold: 0.35
+NmsOverlapThreshold: 0.2
+UseOnnx: false 
+
+PfeOnnx: ../../output/nusense/pfe-sim.onnx
+BackboneOnnx: ../../output/nusense/backbone-sim.onnx
+
+PfeTrt: ../../output/nusense/pfe.trt
+BackboneTrt: ../../output/nusense/backbone.trt
+
+ModelConfig: ../../tools/cfgs/nuscenes_models/cbgs_pp_multihead.yaml
+
+InputFile: ../test-data/nusense.txt
+OutputFile: ../test-data/boxes.txt
