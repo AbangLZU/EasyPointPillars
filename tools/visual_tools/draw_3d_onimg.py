@@ -6,10 +6,11 @@ from skimage import io
 from matplotlib.lines import Line2D
 
 colors = sns.color_palette('Paired', 9 * 2)
-names = ['Car', 'Van', 'Truck', 'Pedestrian', 'Person_sitting', 'Cyclist', 'Tram', 'Misc', 'DontCare']
+# names = ['Car', 'Van', 'Truck', 'Pedestrian', 'Person_sitting', 'Cyclist', 'Tram', 'Misc', 'DontCare']
+names = ['Car', 'Pedestrian', 'Cyclist']
 file_id = '000099'
 
-def draw_line(p1, p2, front=1):
+def draw_line(p1, p2, front, lab):
     plt.gca().add_line(Line2D((p1[0], p2[0]), (p1[1], p2[1]), color=colors[names.index(lab) * 2 + front]))
 
 
@@ -53,30 +54,30 @@ def draw_box_onimage(img_path, label_path, calib_path):
 
 
             # draw the upper 4 horizontal lines
-            draw_line(corners_img[0], corners_img[1], 0)  # front = 0 for the front lines
-            draw_line(corners_img[1], corners_img[2])
-            draw_line(corners_img[2], corners_img[3])
-            draw_line(corners_img[3], corners_img[0])
+            draw_line(corners_img[0], corners_img[1], 0, lab)  # front = 0 for the front lines
+            draw_line(corners_img[1], corners_img[2], 1, lab)
+            draw_line(corners_img[2], corners_img[3], 1, lab)
+            draw_line(corners_img[3], corners_img[0], 1, lab)
 
             # draw the lower 4 horizontal lines
-            draw_line(corners_img[4], corners_img[5], 0)
-            draw_line(corners_img[5], corners_img[6])
-            draw_line(corners_img[6], corners_img[7])
-            draw_line(corners_img[7], corners_img[4])
+            draw_line(corners_img[4], corners_img[5], 0, lab)
+            draw_line(corners_img[5], corners_img[6], 1, lab)
+            draw_line(corners_img[6], corners_img[7], 1, lab)
+            draw_line(corners_img[7], corners_img[4], 1, lab)
 
             # draw the 4 vertical lines
-            draw_line(corners_img[4], corners_img[0], 0)
-            draw_line(corners_img[5], corners_img[1], 0)
-            draw_line(corners_img[6], corners_img[2])
-            draw_line(corners_img[7], corners_img[3])
+            draw_line(corners_img[4], corners_img[0], 0, lab)
+            draw_line(corners_img[5], corners_img[1], 0, lab)
+            draw_line(corners_img[6], corners_img[2], 1, lab)
+            draw_line(corners_img[7], corners_img[3], 1, lab)
 
     # fig.patch.set_visible(False)
     plt.axis('off')
     plt.tight_layout()
-    plt.savefig('examples/kitti_3dbox_to_img.png', bbox_inches='tight')
+    # plt.savefig('examples/kitti_3dbox_to_img.png', bbox_inches='tight')
     plt.show()
 
 if __name__ == '__main__':
-    draw_box_onimage('../../data/kitti/training/image_2/000052.png', 
-        '../../data/kitti/training/label_2/000052.txt', '../../data/kitti/training/calib/000052.txt')
+    draw_box_onimage('../../data/kitti/training/image_2/000032.png', 
+        '../../data/kitti/training/label_2/000032.txt', '../../data/kitti/training/calib/000032.txt')
   
