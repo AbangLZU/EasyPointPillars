@@ -119,10 +119,13 @@ def main():
                 if(sc):
                     labels[i] = labels[i]
                 else:
-                    labels[i] = 999
+                    labels[i] = -1
             # labels = labels & (scores > 0.4)
             # kitti dataset, 1: Car, 2: Pedestrian, 3: Cyclist
             # print(labels)
+            boxs_with_label = np.c_[boxs, labels.T]
+            # save the detected result for plot on image
+            np.savetxt('visual_tools/predicted.txt', boxs_with_label)
             draw_clouds_with_boxes(points, boxs, labels)
 
     logger.info('Demo done.')

@@ -1,17 +1,31 @@
+from tools.visual_tools.calib import Calibration
 import numpy as np
-import seaborn as sns
 import matplotlib.pyplot as plt
 
 from skimage import io
 from matplotlib.lines import Line2D
 
-colors = sns.color_palette('Paired', 9 * 2)
-# names = ['Car', 'Van', 'Truck', 'Pedestrian', 'Person_sitting', 'Cyclist', 'Tram', 'Misc', 'DontCare']
+colors = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
 names = ['Car', 'Pedestrian', 'Cyclist']
-file_id = '000099'
+
+
+def roty(t):
+    """ Rotation about the y-axis. """
+    c = np.cos(t)
+    s = np.sin(t)
+    return np.array([[c, 0, s], [0, 1, 0], [-s, 0, c]])
+
+def rotz(t):
+    """ Rotation about the z-axis. """
+    c = np.cos(t)
+    s = np.sin(t)
+    return np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]])
 
 def draw_line(p1, p2, front, lab):
-    plt.gca().add_line(Line2D((p1[0], p2[0]), (p1[1], p2[1]), color=colors[names.index(lab) * 2 + front]))
+    for item in [p1[0], p2[0], p1[1], p2[1]]:
+        if item < 0:
+            return
+    plt.gca().add_line(Line2D((p1[0], p2[0]), (p1[1], p2[1]), color=colors[int(lab-1)]))
 
 
 def draw_box_onimage(img_path, label_path, calib_path):
@@ -33,25 +47,48 @@ def draw_box_onimage(img_path, label_path, calib_path):
 
     for line in labels:
         line = line.split()
-        lab, _, _, _, _, _, _, _, h, w, l, x, y, z, rot = line
-        h, w, l, x, y, z, rot = map(float, [h, w, l, x, y, z, rot])
-        if lab != 'DontCare':
-            x_corners = [l / 2, l / 2, -l / 2, -l / 2, l / 2, l / 2, -l / 2, -l / 2]
-            y_corners = [0, 0, 0, 0, -h, -h, -h, -h]
-            z_corners = [w / 2, -w / 2, -w / 2, w / 2, w / 2, -w / 2, -w / 2, w / 2]
-            corners_3d = np.vstack([x_corners, y_corners, z_corners])  # (3, 8)
+        x, y, z, l, w, h, rot, lab = line # rot is z axis
 
-            # transform the 3d bbox from object coordiante to camera_0 coordinate
-            R = np.array([[np.cos(rot), 0, np.sin(rot)],
-                        [0, 1, 0],
-                        [-np.sin(rot), 0, np.cos(rot)]])
-            corners_3d = np.dot(R, corners_3d).T + np.array([x, y, z])
+        h, w, l, x, y, z, rot, lab = map(float, [h, w, l, x, y, z, rot, lab])
+        # filter the label probability < 0.3
+        if lab >= 0:
+            # 3d bounding box corners
+            Box = np.array(
+                [
+                    [-l / 2, -l / 2, l / 2, l / 2, -l / 2, -l / 2, l / 2, l / 2],
+                    [w / 2, -w / 2, -w / 2, w / 2, w / 2, -w / 2, -w / 2, w / 2],
+                    [-h / 2, -h / 2, -h / 2, -h / 2, h / 2, h / 2, h / 2, h / 2],
+                ]
+            )
+            # the output rotation is z axis
+            R = rotz(rot)
+            corners_3d = np.dot(R, Box)  # corners_3d: (3, 8)
 
-            # transform the 3d bbox from camera_0 coordinate to camera_x image
-            corners_3d_hom = np.concatenate((corners_3d, np.ones((8, 1))), axis=1)
-            corners_img = np.matmul(corners_3d_hom, P2.T)
-            corners_img = corners_img[:, :2] / corners_img[:, 2][:, None]
+            corners_3d[0, :] = corners_3d[0, :] + x
+            corners_3d[1, :] = corners_3d[1, :] + y
+            corners_3d[2, :] = corners_3d[2, :] + z
 
+            box_corners = np.transpose(corners_3d)
+            #         7 -------- 6
+            #        /|         /|
+            #       4 -------- 5 .
+            #       | |        | |
+            #       . 3 -------- 2
+            #       |/         |/
+            #       0 -------- 1
+
+            calib = Calibration(calib_path)
+
+            ## project box from velo to rect
+            box_corners = calib.project_velo_to_rect(box_corners)
+
+            n = box_corners.shape[0]
+            pts_3d_extend = np.hstack((box_corners, np.ones((n, 1))))
+            # pts_2d: nx2 matrix
+            pts_2d = np.dot(pts_3d_extend, np.transpose(P2))  # nx3
+            pts_2d[:, 0] /= pts_2d[:, 2]
+            pts_2d[:, 1] /= pts_2d[:, 2]
+            corners_img = pts_2d[:, 0:2]
 
             # draw the upper 4 horizontal lines
             draw_line(corners_img[0], corners_img[1], 0, lab)  # front = 0 for the front lines
@@ -74,10 +111,8 @@ def draw_box_onimage(img_path, label_path, calib_path):
     # fig.patch.set_visible(False)
     plt.axis('off')
     plt.tight_layout()
-    # plt.savefig('examples/kitti_3dbox_to_img.png', bbox_inches='tight')
     plt.show()
 
 if __name__ == '__main__':
-    draw_box_onimage('../../data/kitti/training/image_2/000032.png', 
-        '../../data/kitti/training/label_2/000032.txt', '../../data/kitti/training/calib/000032.txt')
-  
+    draw_box_onimage('../../data/kitti/testing/image_2/000099.png', 
+        'predicted.txt', '../../data/kitti/testing/calib/000099.txt')

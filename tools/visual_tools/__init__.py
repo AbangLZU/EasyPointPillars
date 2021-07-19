@@ -55,7 +55,7 @@ def draw_clouds_with_boxes(cloud , boxes, labels):
 
     # create boxes
     for i in range(len(labels)):
-        if labels[i] != 999:
+        if labels[i] >= 0:
             box = boxes[i]
             box_o3d, arrow = create_box_with_arrow(box, cur_box_colors[labels[i] - 1])
             boxes_o3d.append(box_o3d)
