@@ -1,5 +1,6 @@
 <img src="docs/open_mmlab.png" align="right" width="30%">
 
+
 # Update from AdamShan
 
 I modified the OpenPCDet project, the change include:
@@ -10,7 +11,10 @@ I modified the OpenPCDet project, the change include:
 
 So with this repo, you can try to reproduce the pointpillars traing, pytorch -> onnx -> trt, and deploy your trt engine in C++ project.
 
-For more detailed information and description, see my blog later~
+For more detailed information and description, see my blog: https://adamshan.blog.csdn.net/article/details/118880514
+
+Finish the first blog, you can train your own pointpillars and inference it with pytorch:
+![](docs/finnal.png)
 
 
 ------ original readme  of OpenPCDet project-------
