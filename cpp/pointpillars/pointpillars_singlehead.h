@@ -72,7 +72,7 @@
 #include <yaml-cpp/yaml.h>
 #include "preprocess.h"
 #include "scatter.h"
-#include "postprocess.h"
+#include "postprocess_singlehead.h"
 
 using namespace std;
 
@@ -200,7 +200,7 @@ class PointPillarsSingle {
 
     std::unique_ptr<PreprocessPointsCuda> preprocess_points_cuda_ptr_;
     std::unique_ptr<ScatterCuda> scatter_cuda_ptr_;
-    std::unique_ptr<PostprocessCuda> postprocess_cuda_ptr_;
+    std::unique_ptr<PostprocessCudaSingle> postprocess_cuda_ptr_;
 
     Logger g_logger_;
     nvinfer1::ICudaEngine* pfe_engine_;

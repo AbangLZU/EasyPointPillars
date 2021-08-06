@@ -82,7 +82,7 @@ PointPillarsSingle::PointPillarsSingle(const float score_threshold,
     const float float_min = std::numeric_limits<float>::lowest();
     const float float_max = std::numeric_limits<float>::max();
     postprocess_cuda_ptr_.reset(
-      new PostprocessCuda(kNumThreads,
+      new PostprocessCudaSingle(kNumThreads,
                           float_min, float_max, 
                           kNumClass,kNumAnchorPerCls,
                           kMultiheadLabelMapping,
@@ -116,11 +116,6 @@ PointPillarsSingle::~PointPillarsSingle() {
     GPU_CHECK(cudaFree(rpn_buffers_[0]));
     GPU_CHECK(cudaFree(rpn_buffers_[1]));
     GPU_CHECK(cudaFree(rpn_buffers_[2]));
-    GPU_CHECK(cudaFree(rpn_buffers_[3]));
-    GPU_CHECK(cudaFree(rpn_buffers_[4]));
-    GPU_CHECK(cudaFree(rpn_buffers_[5]));
-    GPU_CHECK(cudaFree(rpn_buffers_[6]));
-    GPU_CHECK(cudaFree(rpn_buffers_[7]));
     pfe_context_->destroy();
     backbone_context_->destroy();
     pfe_engine_->destroy();
@@ -229,13 +224,7 @@ void PointPillarsSingle::DeviceMemoryMalloc() {
     GPU_CHECK(cudaMalloc(&rpn_buffers_[0],  kRpnInputSize * sizeof(float))); //13713408
 
     GPU_CHECK(cudaMalloc(&rpn_buffers_[1],  kNumAnchorPerCls  * sizeof(float)));  //classes
-    GPU_CHECK(cudaMalloc(&rpn_buffers_[2],  kNumAnchorPerCls  * 2 * 2 * sizeof(float)));
-    GPU_CHECK(cudaMalloc(&rpn_buffers_[3],  kNumAnchorPerCls  * 2 * 2 * sizeof(float)));
-    GPU_CHECK(cudaMalloc(&rpn_buffers_[4],  kNumAnchorPerCls  * sizeof(float)));
-    GPU_CHECK(cudaMalloc(&rpn_buffers_[5],  kNumAnchorPerCls  * 2 * 2 * sizeof(float)));
-    GPU_CHECK(cudaMalloc(&rpn_buffers_[6],  kNumAnchorPerCls  * 2 * 2 * sizeof(float)));
-    
-    GPU_CHECK(cudaMalloc(&rpn_buffers_[7],  kNumAnchorPerCls * kNumClass * kNumOutputBoxFeature * sizeof(float))); //boxes
+    GPU_CHECK(cudaMalloc(&rpn_buffers_[2],  kNumAnchorPerCls * kNumClass * kNumOutputBoxFeature * sizeof(float))); //boxes
 
     // for scatter kernel
     GPU_CHECK(cudaMalloc(reinterpret_cast<void**>(&dev_scattered_feature_),
@@ -444,12 +433,7 @@ void PointPillarsSingle::DoInference(const float* in_points_array,
     GPU_CHECK(cudaMemset(dev_filter_count_, 0, kNumClass * sizeof(int)));
     postprocess_cuda_ptr_->DoPostprocessCuda(
         reinterpret_cast<float*>(rpn_buffers_[1]), // [cls]   kNumAnchorPerCls 
-        reinterpret_cast<float*>(rpn_buffers_[2]), // [cls]   kNumAnchorPerCls * 2 * 2
-        reinterpret_cast<float*>(rpn_buffers_[3]), // [cls]   kNumAnchorPerCls * 2 * 2
-        reinterpret_cast<float*>(rpn_buffers_[4]), // [cls]   kNumAnchorPerCls 
-        reinterpret_cast<float*>(rpn_buffers_[5]), // [cls]   kNumAnchorPerCls * 2 * 2
-        reinterpret_cast<float*>(rpn_buffers_[6]), // [cls]   kNumAnchorPerCls * 2 * 2
-        reinterpret_cast<float*>(rpn_buffers_[7]), // [boxes] kNumAnchorPerCls * kNumClass * kNumOutputBoxFeature
+        reinterpret_cast<float*>(rpn_buffers_[2]), // [boxes] kNumAnchorPerCls * kNumClass * kNumOutputBoxFeature
         dev_filtered_box_, dev_filtered_score_, dev_filter_count_,
         *out_detections, *out_labels , *out_scores);
     cudaDeviceSynchronize();
