@@ -16,3 +16,9 @@ output
 version.py
 
 .vscode
+
+ros/build
+ros/devel
+ros/logs
+*.onnx
+.catkin_tools
