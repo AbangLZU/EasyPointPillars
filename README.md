@@ -17,6 +17,12 @@ Finish the first blog, you can train your own pointpillars and inference it with
 ![](docs/finnal.png)
 
 
+In case you don't want to retrain the pointpillars from scratch, you can download the model from OpenPCDet model zoo or use the model which trained by AdamShan(Baidu Disk):
+
+link: https://pan.baidu.com/s/1cDq5Nwi_EfZflQHHiOOZWA  password: 32nn
+
+download the checkpoint file(`checkpoint_epoch_80.pth`) and modify the `--ckpt` arguments. From this link, you can also download a sample kitti data(`000099.bin`) for inference testing。
+
 ------ original readme  of OpenPCDet project-------
 
 # OpenPCDet
